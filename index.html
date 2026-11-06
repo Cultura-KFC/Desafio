@@ -118,6 +118,8 @@ input{font:inherit}
 @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
 .mis .mt{font-size:21px;font-weight:700;line-height:1.25;margin-bottom:6px}
 .cv{width:100%;height:auto;border-radius:14px;margin-top:14px;box-shadow:0 0 0 2px var(--line);display:block}
+.cv.drag{touch-action:none;cursor:grab}.cv.drag:active{cursor:grabbing}
+.frame{margin-top:10px;background:var(--paper2,#ece7df);border-radius:14px;padding:10px 14px}.frame[hidden]{display:none}.frame label{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700}.frame input{flex:1;accent-color:var(--red);height:28px}.frame p{font-size:13px;color:var(--muted);margin-top:4px;font-weight:500}
 .hide{display:none!important}
 .btn[disabled]{cursor:not-allowed}
 .hero .n{font-size:15px;opacity:.9;font-family:var(--cond);letter-spacing:.05em;text-transform:uppercase}
@@ -147,6 +149,13 @@ html[data-mode=pc] .wrap.step-cover .cover img.lg{width:150px}
 html[data-mode=pc] .wrap.step-cover .cover h1{font-size:clamp(56px,6.5vw,88px)}
 html[data-mode=pc] .wrap.step-cover .cover p{font-size:24px;max-width:26ch}
 html[data-mode=pc] .wrap.step-cover .how{padding:48px 44px;display:flex;flex-direction:column;justify-content:center}
+.fim h1{font-size:clamp(34px,10vw,64px);overflow-wrap:anywhere}
+.fimok{display:inline-block;margin-top:18px;background:#fff;color:#0a7a3d;font-weight:800;font-size:16px;border-radius:999px;padding:10px 18px}
+html[data-mode=pc] .wrap.step-fim{max-width:720px}
+html[data-mode=pc] .wrap.step-fim .cover{padding:48px 44px;gap:32px}
+html[data-mode=pc] .wrap.step-fim .cover img.lg{width:150px}
+html[data-mode=pc] .wrap.step-fim .cover h1{font-size:clamp(48px,5vw,64px)}
+html[data-mode=pc] .wrap.step-fim .cover p{font-size:22px;max-width:30ch}
 html[data-mode=pc] .lvls{grid-template-columns:repeat(4,1fr)}
 html[data-mode=pc] .q{width:100%;max-width:860px;margin:0 auto;padding:36px 24px}
 html[data-mode=pc] .situ{font-size:38px;margin:14px 0 28px}
@@ -214,12 +223,19 @@ function answer(p){
 }
 function render(){
   const a=$('#app'); const s=S.step;
-  document.documentElement.dataset.mode=S.mode; a.className='wrap step-'+s; a.innerHTML = s==='cover'?vCover(): s==='q'?vQ(): vRes();
+  document.documentElement.dataset.mode=S.mode; a.className='wrap step-'+s; a.innerHTML = s==='cover'?vCover(): s==='q'?vQ(): s==='fim'?vFim(): vRes();
   if(s==='res'){ drawCard(); if(!S.sent){ S.sent=true; const hh=S.res.filter(r=>r&&r.ok).length; const sl=stats().pc.filter(x=>x.v===100).length; track({loja:S.loja,nome:S.nome,nota:notaOf(S.pts),nivel:lvlOf(hh).n,selos:sl+' de 4'}); }
   if(!S.conf){ S.conf=true; const h=S.res.filter(r=>r&&r.ok).length; if(h>=5) confetti(); } }
 }
+function vFim(){
+  return `<div class="red cover pad fim"><img class="lg" src="${LOGO_W}" alt="KFC"><div><div class="ck">Muito obrigado</div><h1 class="serif">Agradecemos por fazer parte!</h1><p>A cultura KFC não está no papel nem nesta tela. Ela está em cada atitude de vocês, todos os dias.</p><p style="margin-top:14px">Cada escolha de hoje construiu a cultura que a gente quer viver.</p>
+  <div class="bounce">${PK.map((p,k)=>`<span style="${pstyle(p)};animation-delay:${k*.15}s">${pimg(p)}</span>`).join('')}</div>
+  <p style="margin-top:22px;font-weight:800">Todos nós somos Guardiões da Cultura KFC.</p>
+  <div class="fimok" role="status">✅ Card enviado com sucesso!</div></div></div>
+  <div class="pad" style="padding-top:18px"><button class="btn soft" data-a="again">Jogar de novo</button></div>`;
+}
 function vCover(){
-  return `<div class="red cover pad"><img class="lg" src="${LOGO_W}" alt="KFC"><div><div class="ck">Desafio relâmpago</div><h1 class="serif">Você é craque do Jeito KFC?</h1><p>Prove no jogo. 8 situações, sem pressa, e o balde de campeão esperando por você.</p>
+  return `<div class="red cover pad"><img class="lg" src="${LOGO_W}" alt="KFC"><div><div class="ck">Desafio relâmpago loja</div><h1 class="serif">Você é craque do Jeito KFC?</h1><p>Prove no jogo. 8 situações, sem pressa, e o balde de campeão esperando por você.</p>
   <div class="bounce">${PK.map((p,k)=>`<span style="${pstyle(p)};animation-delay:${k*.15}s">${pimg(p)}</span>`).join('')}</div>
   <div class="mode" role="group" aria-label="Formato da tela"><button data-a="mode" data-v="cel" class="${S.mode==='cel'?'on':''}">📱 Celular</button><button data-a="mode" data-v="pc" class="${S.mode==='pc'?'on':''}">💻 Computador</button></div></div></div>
   <div class="pad how"><h3><span class="brush">Como ganhar</span></h3>
@@ -267,9 +283,10 @@ function vRes(){
   <div style="display:flex;gap:14px;align-items:center;margin:4px 0 14px"><div style="flex:1;font-weight:700;line-height:1.35;font-size:16px">A foto que você escolher vai <u>direto para o seu card</u>, como no exemplo ao lado.<div style="font-weight:600;font-size:14px;margin-top:8px;opacity:.75">Ele sai com a sua foto, seu nome, sua loja, sua nota e seus selos.</div></div>
   <div style="width:132px;flex:none;text-align:center"><div style="background:#F5002B;border-radius:12px;padding:7px 7px 9px;box-shadow:0 4px 10px rgba(0,0,0,.18)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><img src="${LOGO_R}" alt="" style="height:14px;width:40px;object-fit:contain;object-position:left"><span style="color:#fff;font-size:7px;font-weight:800;font-style:italic">JEITO KFC DE SER</span></div><div style="background:#F5F1EA;border-radius:8px;padding:6px 6px 7px"><div style="border:2px dashed #F5002B;border-radius:6px;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#F5002B;font-weight:800;font-size:10px;line-height:1.15;background:#fff"><span style="font-size:22px">🙂</span>SUA FOTO<br>AQUI</div><div style="font-weight:800;font-size:10px;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(S.nome)}</div><div style="font-size:8px;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📍 ${esc(S.loja)}</div><div style="font-weight:900;font-size:12px;color:#F5002B;margin-top:2px">Nota ${notaOf(S.pts)}</div></div></div><div style="font-size:11px;font-weight:700;margin-top:6px;opacity:.75">Exemplo do card</div></div></div>
   <div class="ideas"><span>🏆 Pose de campeão</span><span>💪 Pose de craque</span><span>😄 Com o time</span><span>🍗 Com o seu uniforme</span></div>
-  <p class="hint" style="margin:0 0 12px">Vale tudo, só não vale aparecer cliente na foto.</p>
+  <p class="hint" style="margin:0 0 12px">Vale tudo, só não vale aparecer cliente na foto. Se der, tire na horizontal.</p>
   <div class="pick"><label class="btn ink" for="cam">📷 Abrir a câmera</label><label class="btn ink" for="file">🖼️ Escolher da galeria</label></div><input id="cam" type="file" accept="image/*" capture="user" hidden><input id="file" type="file" accept="image/*" hidden>
-  <canvas id="cv" class="cv"></canvas>
+  <canvas id="cv" class="cv${S.img?' drag':''}"></canvas>
+  <div class="frame" id="frame" ${S.img?'':'hidden'}><label for="zoom">Zoom<input id="zoom" type="range" min="1" max="3" step="0.01" value="${S.z||1}"></label><p>Arraste a foto no card para enquadrar. Foto na horizontal fica melhor.</p></div>
   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px"><button class="btn" data-a="share">📲 Postar no grupo da loja</button><button class="btn ink" data-a="save">⬇️ Baixar a imagem</button></div>
   <p class="hint">O card sai com a sua foto, seu nome, sua loja, sua nota e seus selos. A nota vai de 0 a 100, em passos de 5. Se o botão de postar não abrir, baixe a imagem e envie pelo grupo.</p></div>
   <div class="card send"><h3>📨 Envie o seu card para a Comunicação Interna</h3><p style="font-weight:600;margin-bottom:10px">Quer que o time de Comunicação Interna veja o seu card? É só tocar em enviar. A imagem vai direto para o time.</p>
@@ -287,7 +304,10 @@ const MISS = {
  SD:['Foto com um cartaz: Aqui tem dono. Escolha o que você cuida como se fosse seu.','Foto apontando para algo que você mesmo resolveu hoje.','Foto com uma ideia de melhoria escrita em papel para levar ao gerente.']
 };
 function confetti(){ const w=document.createElement('div'); w.className='conf'; const em=['🍗','🎉','⭐','🔥']; for(let i=0;i<26;i++){ const s=document.createElement('span'); s.textContent=em[i%4]; s.style.left=(Math.random()*100)+'%'; s.style.animationDelay=(Math.random()*1.2)+'s'; s.style.fontSize=(18+Math.random()*18)+'px'; w.appendChild(s); } document.body.appendChild(w); setTimeout(()=>w.remove(),4200); }
-const loadImg = src => new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src=src; });
+const IMC = {};
+const loadImg = src => IMC[src] || (IMC[src] = new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src=src; }));
+let drawing=false, again=false;
+function redraw(){ if(drawing){ again=true; return; } drawing=true; drawCard().finally(()=>{ drawing=false; if(again){ again=false; redraw(); } }); }
 async function drawCard(){
   const c=$('#cv'); if(!c) return; const W=1080,H=1350; c.width=W; c.height=H; const x=c.getContext('2d');
   try{ await document.fonts.load('800 80px "Barlow Condensed"'); await document.fonts.load('700 40px "Barlow"'); await document.fonts.load('italic 700 60px "Zilla Slab"'); }catch(e){}
@@ -308,7 +328,7 @@ async function drawCard(){
   x.shadowColor='rgba(0,0,0,.35)'; x.shadowBlur=30; x.shadowOffsetY=12; x.fillStyle='#fff'; rr(70,150,940,730,26); x.fill(); x.shadowColor='transparent';
   const fx=96,fy=176,fw=888,fh=600;
   x.save(); rr(fx,fy,fw,fh,14); x.clip();
-  if(S.img){ const im=S.img, r=Math.max(fw/im.width,fh/im.height), w=im.width*r, h=im.height*r; x.drawImage(im,fx+(fw-w)/2,fy+(fh-h)/2,w,h); }
+  if(S.img){ const im=S.img, r=Math.max(fw/im.width,fh/im.height)*(S.z||1), w=im.width*r, h=im.height*r; const mx=(w-fw)/2, my=(h-fh)/2; S.ox=Math.max(-mx,Math.min(mx,S.ox||0)); S.oy=Math.max(-my,Math.min(my,S.oy||0)); x.drawImage(im,fx+(fw-w)/2+S.ox,fy+(fh-h)/2+S.oy,w,h); }
   else { const g=x.createLinearGradient(0,fy,0,fy+fh); g.addColorStop(0,'#F8F5EF'); g.addColorStop(1,'#E9E3D9'); x.fillStyle=g; x.fillRect(fx,fy,fw,fh);
     x.textAlign='center'; const top=lv.k>=3?'Craque':'A caminho de', bot=lv.k>=3?'do Jeito KFC':'craque do Jeito KFC'; const fit=(s,px)=>{ x.font='italic 800 '+px+'px '+COND; while(x.measureText(s).width>780&&px>30){ px-=4; x.font='italic 800 '+px+'px '+COND; } return px; }; const T1=top.toUpperCase(), T2=bot.toUpperCase(); const pxs=Math.min(fit(T1,lv.k>=3?104:88),fit(T2,lv.k>=3?104:88)); if(lv.k>=3){ let px=96; x.font='italic 800 '+px+'px '+COND; const gap=' '; while(x.measureText(T1+gap+T2).width>800&&px>40){ px-=4; x.font='italic 800 '+px+'px '+COND; } const w1=x.measureText(T1+gap).width, w2=x.measureText(T2).width, x0=W/2-(w1+w2)/2; x.textAlign='left'; x.fillStyle='#111'; x.fillText(T1,x0,fy+110); x.fillStyle='#f5002b'; x.fillText(T2,x0+w1,fy+110); x.textAlign='center'; }
     else { x.font='italic 800 '+pxs+'px '+COND; x.fillStyle='#111'; x.fillText(T1,W/2,fy+140); x.fillStyle='#f5002b'; x.fillText(T2,W/2,fy+140+pxs*1.02); }
@@ -344,7 +364,7 @@ async function sendCard(){
   try{
     const hh=S.res.filter(r=>r&&r.ok).length;
     await fetch(CONFIG.CARD_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({nome:S.nome,loja:S.loja,nota:notaOf(S.pts),nivel:lvlOf(hh).n,imagem:c.toDataURL('image/jpeg',0.85)})});
-    btn.textContent='✅ Card enviado'; st.textContent='Recebemos o seu card. Agradecemos a sua participação!';
+    btn.textContent='✅ Card enviado'; st.textContent='Recebemos o seu card. Agradecemos a sua participação!'; setTimeout(()=>{ S.step='fim'; render(); window.scrollTo(0,0); },900);
   }catch(e){ btn.disabled=false; btn.textContent='Enviar meu card'; st.textContent='Não deu para enviar agora. Confira a internet e tente de novo.'; }
 }
 async function saveCard(){ const c=$('#cv'); if(!c) return; const url=c.toDataURL('image/png'); const nm='jeito-kfc-de-ser-'+(S.nome||'card').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')+'.png';
@@ -366,7 +386,12 @@ document.addEventListener('click',e=>{ const el=e.target.closest('[data-a]'); if
   else if(a==='again'){ S.step='cover'; render(); window.scrollTo(0,0); }
 });
 document.addEventListener('input',e=>{ if(e.target.id==='nome'||e.target.id==='loja'){ const g=$('#go'); if(g) g.disabled=!($('#nome').value.trim()&&$('#loja').value.trim()); } });
-document.addEventListener('change',e=>{ if((e.target.id==='file'||e.target.id==='cam')&&e.target.files[0]){ const u=URL.createObjectURL(e.target.files[0]); const im=new Image(); im.onload=()=>{ S.img=im; drawCard(); }; im.src=u; } });
+document.addEventListener('change',e=>{ if((e.target.id==='file'||e.target.id==='cam')&&e.target.files[0]){ const u=URL.createObjectURL(e.target.files[0]); const im=new Image(); im.onload=()=>{ S.img=im; S.z=1; S.ox=0; S.oy=0; if(im.height>im.width*1.05){ const r0=Math.max(888/im.width,600/im.height); S.oy=(im.height*r0-600)/2*0.6; } const c=$('#cv'); if(c) c.classList.add('drag'); const fr=$('#frame'); if(fr){ fr.hidden=false; const z=$('#zoom'); if(z) z.value=1; } drawCard(); }; im.src=u; } });
+let dragP=null;
+document.addEventListener('pointerdown',e=>{ if(e.target.id==='cv'&&S.img){ dragP={x:e.clientX,y:e.clientY}; try{ e.target.setPointerCapture(e.pointerId); }catch(_){} } });
+document.addEventListener('pointermove',e=>{ if(!dragP) return; const c=$('#cv'); if(!c) return; const k=c.width/c.getBoundingClientRect().width; S.ox=(S.ox||0)+(e.clientX-dragP.x)*k; S.oy=(S.oy||0)+(e.clientY-dragP.y)*k; dragP={x:e.clientX,y:e.clientY}; redraw(); });
+const endDrag=()=>{ dragP=null; }; document.addEventListener('pointerup',endDrag); document.addEventListener('pointercancel',endDrag);
+document.addEventListener('input',e=>{ if(e.target.id==='zoom'){ S.z=parseFloat(e.target.value)||1; redraw(); } });
 render();
 </script>
 </body>
